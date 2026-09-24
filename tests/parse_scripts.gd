@@ -15,6 +15,7 @@ func _initialize() -> void:
 		"res://scripts/ui/hud.gd",
 		"res://scripts/ui/touch_controls.gd",
 		"res://tests/test_gameplay.gd",
+		"res://tests/boot_scene.gd",
 	]
 	var valid := true
 	for path in paths:
