@@ -36,6 +36,10 @@ jobs:
           SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
           JAVA="${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}" 
           mkdir -p "$HOME/.config/godot"
+          echo "Godot Android SDK: $SDK"
+          echo "Godot Java SDK: $JAVA"
+          test -d "$SDK"
+          test -d "$JAVA"
           cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
           [gd_resource type="EditorSettings" format=3]
 
@@ -43,6 +47,7 @@ jobs:
           export/android/android_sdk_path = "$SDK"
           export/android/java_sdk_path = "$JAVA"
           EOF
+          cp "$HOME/.config/godot/editor_settings-4.tres" "$HOME/.config/godot/editor_settings-4.3.tres"
           echo "GODOT_ANDROID_SDK_PATH=$SDK" >> "$GITHUB_ENV"
           echo "JAVA_HOME=$JAVA" >> "$GITHUB_ENV"
 
@@ -112,6 +117,12 @@ jobs:
           while IFS= read -r line; do
             [ -n "$line" ] && echo "::error title=Android export::$line"
           done < export-output.log
+          {
+            echo '### Godot Android export output'
+            echo '```text'
+            cat export-output.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
           exit 1
 
       - name: Upload installable APK
