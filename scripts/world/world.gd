@@ -11,7 +11,7 @@ const ROOM_COUNT := 24
 const WORLD_WIDTH := ROOM_WIDTH * ROOM_COUNT
 const GROUND_Y := 550.0
 
-var player: EchofangPlayer
+var player: CharacterBody2D
 var gates: Array[Dictionary] = []
 var current_room := -1
 var current_biome := ""
@@ -30,7 +30,7 @@ var ability_labels := {
 }
 var ambient_time := 0.0
 var death_timer := 0.0
-var boss: EchofangEnemy
+var boss: Node2D
 
 func _state():
 	return get_tree().root.get_node_or_null("GameState")
@@ -94,7 +94,7 @@ func _add_gate(x_position: float, needed: StringName, label: String) -> void:
 
 func _spawn_player() -> void:
 	var player_scene := preload("res://scenes/player.tscn")
-	player = player_scene.instantiate() as EchofangPlayer
+	player = player_scene.instantiate()
 	add_child(player)
 	player.global_position = _state().last_safe_position
 	player.attack_landed.connect(_on_attack_landed)
@@ -112,7 +112,7 @@ func _spawn_pickups() -> void:
 func _spawn_pickup(id: StringName, at: Vector2) -> void:
 	if _state().has_ability(id):
 		return
-	var pickup := preload("res://scripts/world/pickup.gd").new() as AbilityPickup
+	var pickup := preload("res://scripts/world/pickup.gd").new()
 	var metadata: Array = ability_labels[id]
 	pickup.setup(id, metadata[0], metadata[1])
 	pickup.position = at
@@ -121,7 +121,7 @@ func _spawn_pickup(id: StringName, at: Vector2) -> void:
 func _spawn_secrets() -> void:
 	var secret_positions := [Vector2(2300.0, 445.0), Vector2(12200.0, 445.0), Vector2(17000.0, 445.0), Vector2(24700.0, 445.0)]
 	for index in secret_positions.size():
-		var glyph := preload("res://scripts/world/secret_glyph.gd").new() as SecretGlyph
+		var glyph := preload("res://scripts/world/secret_glyph.gd").new()
 		glyph.position = secret_positions[index]
 		glyph.setup("SECRET %02d" % (index + 1))
 		add_child(glyph)
@@ -137,8 +137,8 @@ func _spawn_enemies() -> void:
 		_spawn_enemy(str(item[0]), float(item[1]), false)
 	boss = _spawn_enemy("boss", WORLD_WIDTH - 340.0, true)
 
-func _spawn_enemy(kind: String, x_position: float, is_boss: bool) -> EchofangEnemy:
-	var enemy := preload("res://scripts/combat/enemy.gd").new() as EchofangEnemy
+func _spawn_enemy(kind: String, x_position: float, is_boss: bool) -> Node2D:
+	var enemy := preload("res://scripts/combat/enemy.gd").new()
 	add_child(enemy)
 	enemy.setup(kind, Vector2(x_position, GROUND_Y - 30.0), is_boss)
 	if is_boss:
@@ -202,17 +202,17 @@ func _on_player_ability_used(id: StringName) -> void:
 func _on_attack_landed(target: Node2D, pogo: bool) -> void:
 	if target != null and target.has_method("receive_hit"):
 		target.receive_hit(2 if pogo else 1, player.global_position)
-		var camera := player.get_node_or_null("Camera") as EchofangCamera
+		var camera := player.get_node_or_null("Camera")
 		if camera != null:
 			camera.shake(5.0 if pogo else 3.0, 0.10)
 
 func _on_player_hurt() -> void:
-	var camera := player.get_node_or_null("Camera") as EchofangCamera
+	var camera := player.get_node_or_null("Camera")
 	if camera != null:
 		camera.shake(7.0, 0.15)
 
 func _on_player_died() -> void:
-	var camera := player.get_node_or_null("Camera") as EchofangCamera
+	var camera := player.get_node_or_null("Camera")
 	if camera != null:
 		camera.shake(10.0, 0.3)
 

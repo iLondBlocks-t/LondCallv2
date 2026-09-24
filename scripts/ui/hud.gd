@@ -19,7 +19,7 @@ func _state():
 func _ready() -> void:
 	layer = 20
 	_build_ui()
-	var world := get_parent().get_node_or_null("World") as EchofangWorld
+	var world = get_parent().get_node_or_null("World")
 	if world != null:
 		world.room_changed.connect(_on_room_changed)
 		world.toast_requested.connect(show_toast)
