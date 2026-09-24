@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 jobs:
   verify-and-export:
@@ -28,10 +29,22 @@ jobs:
         run: godot --version && godot --headless --path . --editor --quit --verbose
 
       - name: Run deterministic GDScript suite first
+        id: tests
         shell: bash
         run: |
           set -o pipefail
           godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee test-output.log
+
+      - name: Surface Godot test output as annotations
+        if: failure() && steps.tests.conclusion == 'failure'
+        shell: bash
+        run: |
+          # GitHub's job log service is occasionally unavailable; annotations keep the exact
+          # headless error visible through the Checks API as well as the uploaded artifact.
+          while IFS= read -r line; do
+            [ -n "$line" ] && echo "::error title=Godot test::$line"
+          done < test-output.log
+          exit 1
 
       - name: Export signed debug APK
         shell: bash
