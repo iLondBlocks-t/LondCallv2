@@ -4,6 +4,7 @@ extends SceneTree
 var failures: Array[String] = []
 var checks := 0
 var test_root: Node
+var game_state: Variant
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -18,21 +19,22 @@ func report(condition: bool, description: String) -> void:
 
 func _run() -> void:
 	print("Echofang headless suite — deterministic contracts")
-	if root.get_node_or_null("GameState") == null:
+	game_state = root.get_node_or_null("GameState")
+	if game_state == null:
 		# `--script` normally loads project autoloads; this guard keeps the test useful in editor runs.
 		var state_script = load("res://scripts/core/game_state.gd")
-		var state: Node = state_script.new()
-		state.name = "GameState"
-		root.add_child(state)
+		game_state = state_script.new()
+		game_state.name = "GameState"
+		root.add_child(game_state)
 	test_root = Node.new()
 	test_root.name = "TestFixtures"
 	root.add_child(test_root)
 	var reporter := Callable(self, "report")
 	EchofangGameplayTests.test_movement_constants(reporter)
-	EchofangGameplayTests.test_ability_resources(reporter)
-	EchofangGameplayTests.test_damage_and_iframes(reporter, test_root)
-	EchofangGameplayTests.test_save_load(reporter)
-	EchofangGameplayTests.test_ability_state_actions(reporter, test_root)
+	EchofangGameplayTests.test_ability_resources(reporter, game_state)
+	EchofangGameplayTests.test_damage_and_iframes(reporter, game_state, test_root)
+	EchofangGameplayTests.test_save_load(reporter, game_state)
+	EchofangGameplayTests.test_ability_state_actions(reporter, game_state, test_root)
 	await _scene_transition_smoke()
 	await _hub_sixty_second_smoke()
 	if failures.is_empty():
@@ -56,7 +58,7 @@ func _scene_transition_smoke() -> void:
 	await process_frame
 
 func _hub_sixty_second_smoke() -> void:
-	GameState.reset_run()
+	game_state.call("reset_run")
 	var scene := load("res://scenes/main.tscn") as PackedScene
 	if scene == null:
 		return

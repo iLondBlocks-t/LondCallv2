@@ -12,43 +12,43 @@ static func test_movement_constants(report: Callable) -> void:
 	report.call(is_equal_approx(player.dash_duration, 0.150), "dash duration is 150ms")
 	player.free()
 
-static func test_ability_resources(report: Callable) -> void:
+static func test_ability_resources(report: Callable, state) -> void:
 	var expected := ["fang_dash", "wraith_wings", "wall_cling", "echo_needle", "umbral_pulse"]
 	for id in expected:
 		var resource = load("res://resources/abilities/%s.tres" % id)
 		report.call(resource != null, "%s resource loads" % id)
 		if resource != null:
 			report.call(resource.ability_id == StringName(id), "%s resource id" % id)
-	GameState.reset_run()
+	state.reset_run()
 	for id in expected:
-		GameState.unlock_ability(StringName(id))
-		report.call(GameState.has_ability(StringName(id)), "%s transitions to unlocked" % id)
+		state.unlock_ability(StringName(id))
+		report.call(state.has_ability(StringName(id)), "%s transitions to unlocked" % id)
 
-static func test_damage_and_iframes(report: Callable, parent: Node) -> void:
-	GameState.reset_run()
+static func test_damage_and_iframes(report: Callable, state, parent: Node) -> void:
+	state.reset_run()
 	var player := preload("res://scripts/player/player.gd").new() as EchofangPlayer
 	parent.add_child(player)
 	player.take_damage(1, Vector2.RIGHT)
-	report.call(GameState.health == GameState.MAX_HEALTH - 1, "damage removes one mask")
+	report.call(state.health == state.MAX_HEALTH - 1, "damage removes one mask")
 	player.take_damage(1, Vector2.RIGHT)
-	report.call(GameState.health == GameState.MAX_HEALTH - 1, "i-frames reject immediate repeat damage")
+	report.call(state.health == state.MAX_HEALTH - 1, "i-frames reject immediate repeat damage")
 	player.free()
 
-static func test_save_load(report: Callable) -> void:
-	GameState.reset_run()
-	GameState.unlock_ability(&"fang_dash")
-	GameState.add_motes(37)
-	GameState.last_safe_position = Vector2(1234.0, 482.0)
-	report.call(GameState.save_game(), "save writes JSON")
-	GameState.reset_run()
-	report.call(GameState.load_game(), "load reads JSON")
-	report.call(GameState.has_ability(&"fang_dash"), "save/load persists ability")
-	report.call(GameState.motes == 37, "save/load persists Motes")
-	report.call(GameState.last_safe_position.is_equal_approx(Vector2(1234.0, 482.0)), "save/load persists position")
+static func test_save_load(report: Callable, state) -> void:
+	state.reset_run()
+	state.unlock_ability(&"fang_dash")
+	state.add_motes(37)
+	state.last_safe_position = Vector2(1234.0, 482.0)
+	report.call(state.save_game(), "save writes JSON")
+	state.reset_run()
+	report.call(state.load_game(), "load reads JSON")
+	report.call(state.has_ability(&"fang_dash"), "save/load persists ability")
+	report.call(state.motes == 37, "save/load persists Motes")
+	report.call(state.last_safe_position.is_equal_approx(Vector2(1234.0, 482.0)), "save/load persists position")
 
-static func test_ability_state_actions(report: Callable, parent: Node) -> void:
-	GameState.reset_run()
-	GameState.unlock_ability(&"fang_dash")
+static func test_ability_state_actions(report: Callable, state, parent: Node) -> void:
+	state.reset_run()
+	state.unlock_ability(&"fang_dash")
 	var player := preload("res://scripts/player/player.gd").new() as EchofangPlayer
 	parent.add_child(player)
 	player._start_dash()
