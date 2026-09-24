@@ -4,7 +4,10 @@ extends SceneTree
 func _initialize() -> void:
 	print("BOOT PROBE: loading main scene")
 	var scene = load("res://scenes/main.tscn")
-	if scene == null:
+	print("BOOT PROBE: scene loaded=", scene != null, " can_instantiate=", scene != null and scene.can_instantiate())
+	var player_scene = load("res://scenes/player.tscn")
+	print("BOOT PROBE: player scene loaded=", player_scene != null, " can_instantiate=", player_scene != null and player_scene.can_instantiate())
+	if scene == null or not scene.can_instantiate():
 		quit(1)
 		return
 	var instance = scene.instantiate()
