@@ -64,13 +64,14 @@ func _hub_sixty_second_smoke() -> void:
 	root.add_child(instance)
 	var world: Variant = instance.get_node("World")
 	var player: Variant = world.get_node("Player")
-	# Advance the real gameplay methods directly for 3,600 deterministic 60Hz ticks.
-	# This is a one-minute simulation without making CI sleep for one minute.
-	for frame in 3600:
-		player._physics_process(1.0 / 60.0)
+	# Advance one simulated second per deterministic tick. Sixty iterations cover a full
+	# simulated minute without making CI sleep for a minute or rendering 3,600 frames.
+	for frame in 60:
+		var simulated_delta := 1.0
+		player._physics_process(simulated_delta)
 		for enemy in world.get_tree().get_nodes_in_group("enemies"):
 			if is_instance_valid(enemy) and enemy.has_method("_physics_process"):
-				enemy._physics_process(1.0 / 60.0)
-		world._physics_process(1.0 / 60.0)
+				enemy._physics_process(simulated_delta)
+		world._physics_process(simulated_delta)
 	report(player != null and is_instance_valid(player), "hub smoke keeps player alive for 60 simulated seconds")
 	instance.free()
