@@ -13,6 +13,9 @@ var boss_bar: ColorRect
 var title_label: Label
 var title_timer := 5.5
 
+func _state():
+	return get_tree().root.get_node_or_null("GameState")
+
 func _ready() -> void:
 	layer = 20
 	_build_ui()
@@ -22,9 +25,9 @@ func _ready() -> void:
 		world.toast_requested.connect(show_toast)
 		world.boss_state_changed.connect(_on_boss_state)
 	_on_room_changed(2, "GLOAMROOT", "Lantern Hub")
-	GameState.health_changed.connect(_on_health_changed)
-	GameState.motes_changed.connect(_on_motes_changed)
-	GameState.ability_unlocked.connect(_on_ability_unlocked)
+	_state().health_changed.connect(_on_health_changed)
+	_state().motes_changed.connect(_on_motes_changed)
+	_state().ability_unlocked.connect(_on_ability_unlocked)
 	_refresh()
 
 func _process(delta: float) -> void:
@@ -96,8 +99,8 @@ func _build_ui() -> void:
 	legend.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 func _refresh() -> void:
-	_on_health_changed(GameState.health, GameState.MAX_HEALTH)
-	_on_motes_changed(GameState.motes)
+	_on_health_changed(_state().health, _state().MAX_HEALTH)
+	_on_motes_changed(_state().motes)
 	_on_ability_unlocked(&"")
 
 func _on_health_changed(current: int, maximum: int) -> void:
@@ -123,11 +126,11 @@ func _on_ability_unlocked(_id: StringName) -> void:
 	if ability_label == null:
 		return
 	var parts: Array[String] = []
-	parts.append("ECHO" if GameState.has_ability(&"echo_needle") else "ECHO —")
-	parts.append("DASH" if GameState.has_ability(&"fang_dash") else "DASH —")
-	parts.append("WINGS" if GameState.has_ability(&"wraith_wings") else "WINGS —")
-	parts.append("PULSE" if GameState.has_ability(&"umbral_pulse") else "PULSE —")
-	parts.append("CLING" if GameState.has_ability(&"wall_cling") else "CLING —")
+	parts.append("ECHO" if _state().has_ability(&"echo_needle") else "ECHO —")
+	parts.append("DASH" if _state().has_ability(&"fang_dash") else "DASH —")
+	parts.append("WINGS" if _state().has_ability(&"wraith_wings") else "WINGS —")
+	parts.append("PULSE" if _state().has_ability(&"umbral_pulse") else "PULSE —")
+	parts.append("CLING" if _state().has_ability(&"wall_cling") else "CLING —")
 	ability_label.text = "  ".join(parts)
 
 func show_toast(message: String, color := Color(0.95, 0.77, 0.36)) -> void:

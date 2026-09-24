@@ -62,8 +62,8 @@ func _hub_sixty_second_smoke() -> void:
 		return
 	var instance := scene.instantiate()
 	root.add_child(instance)
-	var world := instance.get_node("World") as EchofangWorld
-	var player := world.get_node("Player") as EchofangPlayer
+	var world: Variant = instance.get_node("World")
+	var player: Variant = world.get_node("Player")
 	# Advance the real gameplay methods directly for 3,600 deterministic 60Hz ticks.
 	# This is a one-minute simulation without making CI sleep for one minute.
 	for frame in 3600:

@@ -25,6 +25,9 @@ var phase := 1
 var orbit_angle := 0.0
 var fx_time := 0.0
 
+func _state():
+	return get_tree().root.get_node_or_null("GameState")
+
 func setup(kind: String, position_in_world: Vector2, boss := false) -> void:
 	enemy_type = kind
 	global_position = position_in_world
@@ -139,8 +142,8 @@ func receive_hit(amount: int, source: Vector2 = Vector2.ZERO) -> void:
 		global_position += (global_position - source).normalized() * 4.0
 	if health <= 0:
 		defeated_state = true
-		GameState.add_motes(motes_reward)
-		GameState.add_umbra(1)
+		_state().add_motes(motes_reward)
+		_state().add_umbra(1)
 		defeated.emit(self, motes_reward)
 		queue_free()
 

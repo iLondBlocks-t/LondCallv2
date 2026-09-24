@@ -60,6 +60,9 @@ var dash_direction := Vector2.RIGHT
 var afterimages: Array[Dictionary] = []
 var fx_time := 0.0
 
+func _state():
+	return get_tree().root.get_node_or_null("GameState")
+
 func _ready() -> void:
 	add_to_group("player")
 	queue_redraw()
@@ -123,7 +126,7 @@ func _process_ground_movement(delta: float) -> void:
 
 func _process_jump_and_walls(_delta: float) -> void:
 	var touching_wall := is_on_wall() and absf(velocity.x) > 4.0
-	wall_cling = touching_wall and GameState.has_ability(&"wall_cling") and not is_on_floor() and Input.get_axis(&"move_left", &"move_right") != 0.0
+	wall_cling = touching_wall and _state().has_ability(&"wall_cling") and not is_on_floor() and Input.get_axis(&"move_left", &"move_right") != 0.0
 	if wall_cling:
 		velocity.y = minf(velocity.y, wall_slide_speed)
 		current_action = &"wall_cling"
@@ -132,7 +135,7 @@ func _process_jump_and_walls(_delta: float) -> void:
 			_do_jump(false)
 		elif wall_cling:
 			_do_wall_jump()
-		elif GameState.has_ability(&"wraith_wings") and not has_used_air_jump():
+		elif _state().has_ability(&"wraith_wings") and not has_used_air_jump():
 			_do_jump(true)
 	if not Input.is_action_pressed(&"jump") and velocity.y < jump_velocity * early_release_factor:
 		velocity.y = jump_velocity * early_release_factor
@@ -194,7 +197,7 @@ func _start_attack() -> void:
 		attack_landed.emit(hit_target, true)
 		else:
 			attack_landed.emit(hit_target, false)
-			GameState.add_umbra(1)
+			_state().add_umbra(1)
 			hit_stop_left = 0.045
 			_fx_burst(Color(0.98, 0.78, 0.35), 10)
 
@@ -222,12 +225,12 @@ func _find_attack_target(aim: Vector2, pogo: bool) -> Node2D:
 	return best
 
 func _start_dash() -> void:
-	if not GameState.has_ability(&"fang_dash") or dash_cooldown_left > 0.0 or is_dashing:
+	if not _state().has_ability(&"fang_dash") or dash_cooldown_left > 0.0 or is_dashing:
 		return
 	var aim := Vector2(Input.get_axis(&"move_left", &"move_right"), Input.get_axis(&"move_up", &"move_down"))
 	if aim.length_squared() < 0.1:
 		aim = Vector2(facing, 0.0)
-	if not GameState.has_ability(&"dash_8way"):
+	if not _state().has_ability(&"dash_8way"):
 		aim.y = 0.0
 	dash_direction = aim.normalized()
 	is_dashing = true
@@ -254,7 +257,7 @@ func _process_dash(delta: float) -> void:
 func take_damage(amount: int, from: Vector2 = Vector2.ZERO) -> void:
 	if is_dead or invulnerable_left > 0.0:
 		return
-	var died_now := GameState.damage(amount)
+	var died_now: bool = bool(_state().damage(amount))
 	invulnerable_left = damage_invulnerability
 	is_hurt = true
 	current_action = &"hurt"
@@ -268,7 +271,7 @@ func take_damage(amount: int, from: Vector2 = Vector2.ZERO) -> void:
 func _die() -> void:
 	is_dead = true
 	current_action = &"death"
-	GameState.begin_death(global_position)
+	_state().begin_death(global_position)
 	died.emit()
 
 func revive_at(position: Vector2) -> void:
@@ -289,7 +292,7 @@ func _process_landing() -> void:
 		current_action = &"fall"
 
 func _use_ability(id: StringName) -> void:
-	if not GameState.has_ability(id):
+	if not _state().has_ability(id):
 		return
 	if id == &"echo_needle":
 		current_action = &"echo_needle"
@@ -298,7 +301,7 @@ func _use_ability(id: StringName) -> void:
 		for glyph in get_tree().get_nodes_in_group("secret_glyph"):
 			if glyph.has_method("reveal"):
 				glyph.reveal()
-	elif id == &"umbral_pulse" and GameState.spend_umbra(3):
+	elif id == &"umbral_pulse" and _state().spend_umbra(3):
 		current_action = &"umbral_pulse"
 		ability_used.emit(id)
 		_fx_burst(Color(0.36, 0.16, 0.82), 13)

@@ -32,16 +32,19 @@ var ambient_time := 0.0
 var death_timer := 0.0
 var boss: EchofangEnemy
 
+func _state():
+	return get_tree().root.get_node_or_null("GameState")
+
 func _ready() -> void:
-	if not GameState.expedition_started:
-		GameState.reset_run()
+	if not _state().expedition_started:
+		_state().reset_run()
 	_build_atmosphere()
 	_build_collision()
 	_spawn_player()
 	_spawn_pickups()
 	_spawn_secrets()
 	_spawn_enemies()
-	GameState.ability_unlocked.connect(_on_ability_unlocked)
+	_state().ability_unlocked.connect(_on_ability_unlocked)
 	queue_redraw()
 
 func _build_atmosphere() -> void:
@@ -93,7 +96,7 @@ func _spawn_player() -> void:
 	var player_scene := preload("res://scenes/player.tscn")
 	player = player_scene.instantiate() as EchofangPlayer
 	add_child(player)
-	player.global_position = GameState.last_safe_position
+	player.global_position = _state().last_safe_position
 	player.attack_landed.connect(_on_attack_landed)
 	player.hurt_started.connect(_on_player_hurt)
 	player.died.connect(_on_player_died)
@@ -107,7 +110,7 @@ func _spawn_pickups() -> void:
 	_spawn_pickup(&"wall_cling", Vector2(19800.0, 300.0))
 
 func _spawn_pickup(id: StringName, at: Vector2) -> void:
-	if GameState.has_ability(id):
+	if _state().has_ability(id):
 		return
 	var pickup := preload("res://scripts/world/pickup.gd").new() as AbilityPickup
 	var metadata: Array = ability_labels[id]
@@ -149,7 +152,7 @@ func _physics_process(delta: float) -> void:
 		return
 	for gate in gates:
 		var body: StaticBody2D = gate.body
-		var open := GameState.has_ability(StringName(gate.ability))
+		var open: bool = bool(_state().has_ability(StringName(gate.ability)))
 		body.collision_layer = 0 if open else 1
 		body.collision_mask = 0 if open else 2
 		body.modulate = Color(0.6, 0.9, 1.0, 0.12 if open else 0.82)
@@ -158,18 +161,18 @@ func _physics_process(delta: float) -> void:
 	var room := clampi(int(floor(player.global_position.x / ROOM_WIDTH)) + 1, 1, ROOM_COUNT)
 	if room != current_room:
 		current_room = room
-		GameState.current_room = room
+		_state().current_room = room
 		current_biome = _biome_for_room(room)
-		GameState.last_safe_position = player.global_position
-		GameState.save_game()
+		_state().last_safe_position = player.global_position
+		_state().save_game()
 		room_changed.emit(room, current_biome, room_names[room - 1])
-	if GameState.recovery_motes > 0 and player.global_position.distance_to(GameState.recovery_position) < 48.0:
-		var recovered := GameState.recover_corpse()
+	if _state().recovery_motes > 0 and player.global_position.distance_to(_state().recovery_position) < 48.0:
+		var recovered: int = int(_state().recover_corpse())
 		toast_requested.emit("CORPSE RECOVERED  +%d MOTES" % recovered, Color(0.95, 0.77, 0.36))
 	if player.is_dead:
 		death_timer += delta
 		if death_timer > 2.0:
-			player.revive_at(GameState.last_safe_position)
+			player.revive_at(_state().last_safe_position)
 			death_timer = 0.0
 			toast_requested.emit("THE ECHO REMEMBERS.  TRY AGAIN.", Color(0.72, 0.38, 1.0))
 	if boss != null and is_instance_valid(boss) and not boss.defeated_state and room >= ROOM_COUNT:
@@ -188,7 +191,7 @@ func _biome_for_room(room: int) -> String:
 func _on_ability_unlocked(id: StringName) -> void:
 	var metadata: Array = ability_labels.get(id, [str(id), Color.WHITE])
 	toast_requested.emit("%s AWAKENS" % metadata[0].to_upper(), metadata[1])
-	GameState.save_game()
+	_state().save_game()
 
 func _on_player_ability_used(id: StringName) -> void:
 	if id == &"echo_needle":
@@ -250,7 +253,7 @@ func _draw() -> void:
 	# Gate glyphs show the rule before the collision is encountered.
 	for gate in gates:
 		var body: StaticBody2D = gate.body
-		var open := GameState.has_ability(StringName(gate.ability))
+		var open: bool = bool(_state().has_ability(StringName(gate.ability)))
 		var color := Color(0.32, 0.93, 0.93, 0.24 if open else 0.88)
 		draw_line(Vector2(body.position.x, 110), Vector2(body.position.x, 540), color, 5.0)
 		draw_string(ThemeDB.fallback_font, Vector2(body.position.x - 100, 118), str(gate.label), HORIZONTAL_ALIGNMENT_CENTER, 200, 13, color)

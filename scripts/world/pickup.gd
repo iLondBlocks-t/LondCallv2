@@ -7,6 +7,9 @@ var color := Color.WHITE
 var pulse := 0.0
 var collected := false
 
+func _state():
+	return get_tree().root.get_node_or_null("GameState")
+
 func setup(id: StringName, label: String, tint: Color) -> void:
 	ability_id = id
 	display_name = label
@@ -28,7 +31,7 @@ func _on_body_entered(body: Node2D) -> void:
 	if collected or not body.is_in_group("player"):
 		return
 	collected = true
-	GameState.unlock_ability(ability_id)
+	_state().unlock_ability(ability_id)
 	queue_free()
 
 func _draw() -> void:

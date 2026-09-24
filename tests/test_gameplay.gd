@@ -4,7 +4,7 @@ extends RefCounted
 
 static func test_movement_constants(report: Callable) -> void:
 	var player_script = load("res://scripts/player/player.gd")
-	var player := player_script.new() as EchofangPlayer
+	var player: Variant = player_script.new()
 	report.call(is_equal_approx(player.coyote_time, 0.120), "coyote time is 120ms")
 	report.call(is_equal_approx(player.jump_buffer_time, 0.150), "jump buffer is 150ms")
 	report.call(is_equal_approx(player.acceleration_time, 0.060), "acceleration is 60ms")
@@ -26,7 +26,7 @@ static func test_ability_resources(report: Callable, state) -> void:
 
 static func test_damage_and_iframes(report: Callable, state, parent: Node) -> void:
 	state.reset_run()
-	var player := preload("res://scripts/player/player.gd").new() as EchofangPlayer
+	var player: Variant = preload("res://scripts/player/player.gd").new()
 	parent.add_child(player)
 	player.take_damage(1, Vector2.RIGHT)
 	report.call(state.health == state.MAX_HEALTH - 1, "damage removes one mask")
@@ -49,7 +49,7 @@ static func test_save_load(report: Callable, state) -> void:
 static func test_ability_state_actions(report: Callable, state, parent: Node) -> void:
 	state.reset_run()
 	state.unlock_ability(&"fang_dash")
-	var player := preload("res://scripts/player/player.gd").new() as EchofangPlayer
+	var player: Variant = preload("res://scripts/player/player.gd").new()
 	parent.add_child(player)
 	player._start_dash()
 	report.call(player.is_dashing, "Fang Dash enters dash state")
