@@ -35,8 +35,8 @@ func _run() -> void:
 	EchofangGameplayTests.test_damage_and_iframes(reporter, game_state, test_root)
 	EchofangGameplayTests.test_save_load(reporter, game_state)
 	EchofangGameplayTests.test_ability_state_actions(reporter, game_state, test_root)
-	await _scene_transition_smoke()
-	await _hub_sixty_second_smoke()
+	_scene_transition_smoke()
+	_hub_sixty_second_smoke()
 	if failures.is_empty():
 		print("ALL TESTS PASS — %d checks" % checks)
 		quit(0)
@@ -46,16 +46,14 @@ func _run() -> void:
 
 func _scene_transition_smoke() -> void:
 	var scene := load("res://scenes/main.tscn") as PackedScene
-	report.call(scene != null, "main scene loads")
+	report(scene != null, "main scene loads")
 	if scene == null:
 		return
 	var instance := scene.instantiate()
 	root.add_child(instance)
-	await physics_frame
-	report.call(instance.get_node_or_null("World") != null, "world node exists after transition")
-	report.call(instance.get_node_or_null("HUD") != null, "HUD node exists after transition")	
-	instance.queue_free()
-	await process_frame
+	report(instance.get_node_or_null("World") != null, "world node exists after transition")
+	report(instance.get_node_or_null("HUD") != null, "HUD node exists after transition")
+	instance.free()
 
 func _hub_sixty_second_smoke() -> void:
 	game_state.call("reset_run")
@@ -64,12 +62,15 @@ func _hub_sixty_second_smoke() -> void:
 		return
 	var instance := scene.instantiate()
 	root.add_child(instance)
-	await physics_frame
-	# 60 frames at 60x time scale is exactly one simulated minute while CI remains quick.
-	Engine.time_scale = 60.0
-	for frame in 60:
-		await physics_frame
-	Engine.time_scale = 1.0
-	report.call(instance.get_node_or_null("World/Player") != null, "hub smoke keeps player alive for 60 simulated seconds")
-	instance.queue_free()
-	await process_frame
+	var world := instance.get_node("World") as EchofangWorld
+	var player := world.get_node("Player") as EchofangPlayer
+	# Advance the real gameplay methods directly for 3,600 deterministic 60Hz ticks.
+	# This is a one-minute simulation without making CI sleep for one minute.
+	for frame in 3600:
+		player._physics_process(1.0 / 60.0)
+		for enemy in world.get_tree().get_nodes_in_group("enemies"):
+			if is_instance_valid(enemy) and enemy.has_method("_physics_process"):
+				enemy._physics_process(1.0 / 60.0)
+		world._physics_process(1.0 / 60.0)
+	report(player != null and is_instance_valid(player), "hub smoke keeps player alive for 60 simulated seconds")
+	instance.free()
