@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee test-output.log
+          timeout 90s godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee test-output.log
 
       - name: Surface Godot test output as annotations
         if: failure() && steps.tests.conclusion == 'failure'
