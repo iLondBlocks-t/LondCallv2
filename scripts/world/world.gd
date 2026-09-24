@@ -36,6 +36,7 @@ func _state():
 	return get_tree().root.get_node_or_null("GameState")
 
 func _ready() -> void:
+	print("ECHOFANG READY WORLD")
 	if not _state().expedition_started:
 		_state().reset_run()
 	_build_atmosphere()

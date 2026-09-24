@@ -7,6 +7,7 @@ var button_style: StyleBoxFlat
 var pressed_style: StyleBoxFlat
 
 func _ready() -> void:
+	print("ECHOFANG READY TOUCH")
 	layer = 30
 	_build_styles()
 	root = Control.new()

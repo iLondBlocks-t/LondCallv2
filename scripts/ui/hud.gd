@@ -17,6 +17,7 @@ func _state():
 	return get_tree().root.get_node_or_null("GameState")
 
 func _ready() -> void:
+	print("ECHOFANG READY HUD")
 	layer = 20
 	_build_ui()
 	var world := get_parent().get_node_or_null("World") as EchofangWorld
