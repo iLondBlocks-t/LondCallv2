@@ -21,7 +21,7 @@ func _run() -> void:
 	if root.get_node_or_null("GameState") == null:
 		# `--script` normally loads project autoloads; this guard keeps the test useful in editor runs.
 		var state_script = load("res://scripts/core/game_state.gd")
-		var state := state_script.new()
+		var state: Node = state_script.new()
 		state.name = "GameState"
 		root.add_child(state)
 	test_root = Node.new()
