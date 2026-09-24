@@ -26,7 +26,8 @@ static func test_ability_resources(report: Callable, state) -> void:
 
 static func test_damage_and_iframes(report: Callable, state, parent: Node) -> void:
 	state.reset_run()
-	var player: Variant = preload("res://scripts/player/player.gd").new()
+	var player_script = load("res://scripts/player/player.gd")
+	var player: Variant = player_script.new()
 	parent.add_child(player)
 	player.take_damage(1, Vector2.RIGHT)
 	report.call(state.health == state.MAX_HEALTH - 1, "damage removes one mask")
@@ -49,7 +50,8 @@ static func test_save_load(report: Callable, state) -> void:
 static func test_ability_state_actions(report: Callable, state, parent: Node) -> void:
 	state.reset_run()
 	state.unlock_ability(&"fang_dash")
-	var player: Variant = preload("res://scripts/player/player.gd").new()
+	var player_script = load("res://scripts/player/player.gd")
+	var player: Variant = player_script.new()
 	parent.add_child(player)
 	player._start_dash()
 	report.call(player.is_dashing, "Fang Dash enters dash state")
