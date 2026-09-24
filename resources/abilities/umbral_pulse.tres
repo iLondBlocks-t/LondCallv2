@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AbilityResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/ability_resource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"umbral_pulse"
+display_name = "Umbral Pulse"
+description = "Spend three Umbra to fire a black-violet bolt."
+input_action = &"ability_2"
+gate_label = "Umbral Lock"
+resource_cost = 3
+cooldown_seconds = 0.6
+active_seconds = 0.18
+color = Color(0.36, 0.16, 0.82, 1)
+vfx_id = "umbra_bolt"
+sfx_id = "bass_thump"

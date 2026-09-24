@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AbilityResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/ability_resource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"fang_dash"
+display_name = "Fang Dash"
+description = "A razor-fast burst with i-frames and an attack cancel."
+input_action = &"dash"
+gate_label = "Dash Chasm"
+cooldown_seconds = 0.65
+active_seconds = 0.15
+invulnerable = true
+color = Color(0.32, 0.93, 0.93, 1)
+vfx_id = "cyan_afterimage"
+sfx_id = "air_cut"

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="AbilityResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/ability_resource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"wall_cling"
+display_name = "Wall Cling"
+description = "Latch to walls, slide slowly, and launch with expressive steering."
+input_action = &"move_up"
+gate_label = "Archive Walls"
+cooldown_seconds = 0.1
+active_seconds = 0.1
+color = Color(0.95, 0.66, 0.31, 1)
+vfx_id = "claw_sparks"
+sfx_id = "stone_scrape"

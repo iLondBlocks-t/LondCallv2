@@ -1,6 +1,0 @@
-{
-  "name": "LondCall",
-  "description": "Production WebRTC voice and video calling app with Firebase authentication, Firestore signaling, and adaptive streaming.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

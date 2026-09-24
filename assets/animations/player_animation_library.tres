@@ -1,0 +1,13 @@
+[gd_resource type="AnimationLibrary" load_steps=2 format=3]
+
+[sub_resource type="Animation" id="Animation_RESET"]
+resource_name = "RESET"
+length = 0.1
+
+[sub_resource type="Animation" id="Animation_IDLE"]
+resource_name = "idle"
+length = 1.0
+loop_mode = 1
+
+[resource]
+_data = {&"RESET": SubResource("Animation_RESET"), &"idle": SubResource("Animation_IDLE")}

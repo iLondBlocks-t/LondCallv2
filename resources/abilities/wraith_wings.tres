@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="AbilityResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/ability_resource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"wraith_wings"
+display_name = "Wraith Wings"
+description = "A second jump with a brief hang-time and air drift."
+input_action = &"jump"
+gate_label = "Wraith Shaft"
+cooldown_seconds = 0.12
+active_seconds = 0.22
+color = Color(0.77, 0.86, 1, 1)
+vfx_id = "wing_gust"
+sfx_id = "glass_chime"

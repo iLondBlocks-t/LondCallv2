@@ -1,0 +1,62 @@
+name: Echofang Android build
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-export:
+    name: Test and export Android APK
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3.0
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Verify Godot version and project import
+        shell: bash
+        run: godot --version && godot --headless --path . --editor --quit --verbose
+
+      - name: Run deterministic GDScript suite first
+        shell: bash
+        run: godot --headless --path . --script res://tests/run_tests.gd
+
+      - name: Export signed debug APK
+        shell: bash
+        env:
+          # A protected release keystore can replace Godot's debug signer later.
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          mkdir -p build
+          if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/echofang-release.keystore
+            export GODOT_ANDROID_KEYSTORE_RELEASE_PATH=/tmp/echofang-release.keystore
+          fi
+          # package/signed=true uses Godot's CI debug keystore when no release secret exists.
+          godot --headless --path . --export-debug "Android" build/Echofang.apk
+          test -s build/Echofang.apk
+
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: echofang-android-debug
+          path: build/Echofang.apk
+          if-no-files-found: error
+
+      - name: Upload Godot logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: echofang-failure-logs
+          path: |
+            ~/.local/share/godot/app_userdata/**/*.log
+            .godot/**/*.log
+          if-no-files-found: ignore

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="AbilityResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/ability_resource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+ability_id = &"echo_needle"
+display_name = "Echo Needle"
+description = "Read hidden walls and parry the Choir's marked attacks."
+input_action = &"ability_1"
+gate_label = "Humming Glyphs"
+cooldown_seconds = 0.5
+active_seconds = 0.34
+color = Color(0.72, 0.38, 1, 1)
+vfx_id = "sonar_rings"
+sfx_id = "low_heartbeat"
