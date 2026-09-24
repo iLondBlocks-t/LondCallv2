@@ -78,5 +78,5 @@ The suite checks feel constants, state transitions for all five abilities, damag
 
 - Local structural verification: project, scenes, scripts, resources, docs, and CI are present and tracked.
 - Headless verification: run `godot --headless --path . --script res://tests/run_tests.gd`; the GitHub workflow is the authoritative Godot 4.x / Android export environment.
-- Android: export preset is landscape, the CI runner generates an ephemeral debug keystore and signs/verifies the APK with Android SDK `apksigner`, and uploads it as `echofang-android-debug`.
+- Android: export preset is landscape and explicitly targets `armeabi-v7a` (32-bit ARM) for Android 9 devices; the Compatibility renderer is used because Godot documents Android 6+ for Compatibility and Android 9+ for the heavier Mobile/Forward+ renderer. The CI runner generates an ephemeral debug keystore and signs/verifies the APK with Android SDK `apksigner`, and uploads it as `echofang-android-debug`.
 - Full release work beyond this slice: replace procedural art/audio with commissioned production assets, expand the world graph, tune boss balance with playtest telemetry, add controller remapping UI, and configure a protected release keystore through GitHub Secrets.

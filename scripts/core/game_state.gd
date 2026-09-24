@@ -28,7 +28,6 @@ var recovery_position := Vector2.ZERO
 var expedition_started := false
 
 func _ready() -> void:
-	print("ECHOFANG READY STATE")
 	# A fresh run is the default for the playable slice. Continue can call load_game.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 

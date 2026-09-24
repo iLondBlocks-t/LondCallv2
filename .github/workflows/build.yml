@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          timeout 30s godot --headless --path . --script res://tests/boot_scene.gd --verbose 2>&1 | tee app-smoke.log
+          timeout 30s godot --headless --display-driver dummy --path . --script res://tests/boot_scene.gd --verbose 2>&1 | tee app-smoke.log
           test ${PIPESTATUS[0]} -eq 0
           ! grep -q "^ERROR:" app-smoke.log
 

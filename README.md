@@ -1,6 +1,6 @@
 # Echofang
 
-A landscape-first Godot 4.x metroidvania vertical slice: precise CharacterBody2D movement, five traversal/combat abilities, pogo combat, an 8-archetype enemy roster, three-phase Pale Choir boss, 24-room graph, procedural silhouette art, touch/gamepad/keyboard controls, save/load, and Android CI export.
+A landscape-first Godot 4.x metroidvania vertical slice: precise CharacterBody2D movement, five traversal/combat abilities, pogo combat, an 8-archetype enemy roster, three-phase Pale Choir boss, 24-room graph, procedural silhouette art, touch/gamepad/keyboard controls, save/load, and Android CI export. The APK preset targets `armeabi-v7a` 32-bit ARM for Android 9-class phones and uses the Compatibility renderer.
 
 ## Run
 

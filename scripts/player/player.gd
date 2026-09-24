@@ -64,7 +64,6 @@ func _state():
 	return get_tree().root.get_node_or_null("GameState")
 
 func _ready() -> void:
-	print("ECHOFANG READY PLAYER")
 	add_to_group("player")
 	queue_redraw()
 
