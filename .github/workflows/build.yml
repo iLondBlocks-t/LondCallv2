@@ -12,11 +12,16 @@ jobs:
   verify-and-export:
     name: Test and export Android APK
     runs-on: ubuntu-latest
-    container:
-      image: barichello/godot-ci:4.3.0
     steps:
       - name: Check out
         uses: actions/checkout@v4
+
+      - name: Set up Godot 4.3 and Android export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: true
 
       - name: Verify Godot version and project import
         shell: bash
