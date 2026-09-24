@@ -77,6 +77,14 @@ jobs:
           done < test-output.log
           exit 1
 
+      - name: Launch main scene headlessly
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30s godot --headless --path . --quit-after 3 --verbose 2>&1 | tee app-smoke.log
+          test ${PIPESTATUS[0]} -eq 0
+          ! grep -q "^ERROR:" app-smoke.log
+
       - name: Export signed debug APK
         id: export
         shell: bash
@@ -139,6 +147,7 @@ jobs:
           name: echofang-failure-logs
           path: |
             test-output.log
+            app-smoke.log
             export-output.log
             ~/.local/share/godot/app_userdata/**/*.log
             .godot/**/*.log
