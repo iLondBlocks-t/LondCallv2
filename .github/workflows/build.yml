@@ -24,6 +24,22 @@ jobs:
           use-dotnet: false
           include-templates: true
 
+      - name: Configure Android SDK and Java paths for Godot
+        shell: bash
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          JAVA="${JAVA_HOME:-$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")}" 
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$SDK"
+          export/android/java_sdk_path = "$JAVA"
+          EOF
+          echo "GODOT_ANDROID_SDK_PATH=$SDK" >> "$GITHUB_ENV"
+          echo "JAVA_HOME=$JAVA" >> "$GITHUB_ENV"
+
       - name: Verify Godot version and project import
         shell: bash
         run: godot --version && godot --headless --path . --editor --quit --verbose
