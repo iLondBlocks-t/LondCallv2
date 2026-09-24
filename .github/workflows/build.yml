@@ -17,6 +17,19 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
+      - name: Set up Java 17 for Android export
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK for APK signing and export
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform and build tools
+        shell: bash
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
       - name: Set up Godot 4.3 and Android export templates
         uses: chickensoft-games/setup-godot@v2
         with:
