@@ -28,6 +28,10 @@ jobs:
         shell: bash
         run: godot --version && godot --headless --path . --editor --quit --verbose
 
+      - name: Parse gameplay scripts
+        shell: bash
+        run: godot --headless --path . --script res://tests/parse_scripts.gd
+
       - name: Run deterministic GDScript suite first
         id: tests
         shell: bash
