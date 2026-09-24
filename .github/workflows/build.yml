@@ -85,6 +85,15 @@ jobs:
           test ${PIPESTATUS[0]} -eq 0
           ! grep -q "^ERROR:" app-smoke.log
 
+      - name: Surface main scene smoke output
+        if: failure()
+        shell: bash
+        run: |
+          while IFS= read -r line; do
+            [ -n "$line" ] && echo "::error title=Main scene smoke::$line"
+          done < app-smoke.log
+          exit 1
+
       - name: Export signed debug APK
         id: export
         shell: bash
