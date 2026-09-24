@@ -104,9 +104,12 @@ func recover_corpse() -> int:
 	return recovered
 
 func save_game() -> bool:
+	var saved_abilities: Dictionary = {}
+	for key in abilities.keys():
+		saved_abilities[str(key)] = bool(abilities[key])
 	var payload := {
 		"version": 1,
-		"abilities": abilities,
+		"abilities": saved_abilities,
 		"health": health,
 		"motes": motes,
 		"umbra": umbra,
@@ -137,7 +140,7 @@ func load_game() -> bool:
 	var saved_abilities = saved.get("abilities", {})
 	if saved_abilities is Dictionary:
 		for key in abilities.keys():
-			abilities[key] = bool(saved_abilities.get(key, false))
+			abilities[key] = bool(saved_abilities.get(str(key), saved_abilities.get(key, false)))
 	health = clampi(int(saved.get("health", MAX_HEALTH)), 1, MAX_HEALTH)
 	motes = maxi(0, int(saved.get("motes", 0)))
 	umbra = clampi(int(saved.get("umbra", 0)), 0, MAX_UMBRA)
