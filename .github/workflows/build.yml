@@ -65,9 +65,22 @@ jobs:
             echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > /tmp/echofang-release.keystore
             export GODOT_ANDROID_KEYSTORE_RELEASE_PATH=/tmp/echofang-release.keystore
           fi
-          # package/signed=true uses Godot's CI debug keystore when no release secret exists.
+          # Godot's 4.3 headless validator rejects an empty debug-key triplet even for a
+          # debug export. Export unsigned, then generate a throwaway CI debug keystore and
+          # sign with the Android SDK's apksigner. No key material is committed.
+          keytool -genkeypair -noprompt -keystore /tmp/echofang-debug.keystore \
+            -storepass android -keypass android -alias androiddebugkey \
+            -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
           set -o pipefail
-          godot --headless --path . --export-debug "Android" build/Echofang.apk 2>&1 | tee export-output.log
+          godot --headless --path . --export-debug "Android" build/Echofang-unsigned.apk 2>&1 | tee export-output.log
+          test -s build/Echofang-unsigned.apk
+          ANDROID_SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          APKSIGNER=$(find "$ANDROID_SDK/build-tools" -name apksigner -type f | sort -V | tail -1)
+          test -x "$APKSIGNER"
+          "$APKSIGNER" sign --ks /tmp/echofang-debug.keystore --ks-pass pass:android \
+            --key-pass pass:android --ks-key-alias androiddebugkey \
+            --out build/Echofang.apk build/Echofang-unsigned.apk
+          "$APKSIGNER" verify --verbose build/Echofang.apk
           test -s build/Echofang.apk
 
       - name: Surface Android export output as annotations
