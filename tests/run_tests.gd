@@ -56,6 +56,12 @@ func _scene_transition_smoke(reporter: Callable) -> void:
 	reporter.call(scene != null, "main scene loads")
 	if scene != null:
 		reporter.call(scene.resource_path == "res://scenes/main.tscn", "main scene resource path is stable")
+		var instance = scene.instantiate()
+		reporter.call(instance != null, "main scene instantiates")
+		if instance != null:
+			test_root.add_child(instance)
+			reporter.call(instance.get_node_or_null("World") != null, "main scene enters tree")
+			instance.queue_free()
 
 func _hub_sixty_second_smoke(reporter: Callable) -> void:
 	game_state.call("reset_run")
