@@ -95,7 +95,7 @@ func _physics_process(delta: float) -> void:
 		_use_ability(&"umbral_pulse")
 	if is_dashing:
 		_process_dash(delta)
-	else:
+	if not is_dashing:
 		_process_ground_movement(delta)
 		_process_jump_and_walls(delta)
 		_process_combat(delta)
@@ -183,7 +183,7 @@ func _start_attack() -> void:
 		return
 	if combo_left > 0.0:
 		combo_step = mini(combo_step + 1, 3)
-	else:
+	if combo_left <= 0.0:
 		combo_step = 1
 	combo_left = combo_window
 	attack_left = attack_active_time
@@ -196,8 +196,8 @@ func _start_attack() -> void:
 		if did_pogo:
 			velocity.y = pogo_velocity
 			air_jump_available = true
-		attack_landed.emit(hit_target, true)
-		else:
+			attack_landed.emit(hit_target, true)
+		if not did_pogo:
 			attack_landed.emit(hit_target, false)
 			_state().add_umbra(1)
 			hit_stop_left = 0.045
