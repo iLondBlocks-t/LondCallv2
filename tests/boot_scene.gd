@@ -6,6 +6,9 @@ func _initialize() -> void:
 
 func _boot() -> void:
 	print("BOOT PROBE: loading main scene")
+	for path in ["res://scripts/world/world.gd", "res://scripts/ui/hud.gd", "res://scripts/ui/touch_controls.gd"]:
+		var script = load(path)
+		print("BOOT PROBE: script ", path, " loaded=", script != null)
 	var scene = load("res://scenes/main.tscn")
 	print("BOOT PROBE: scene loaded=", scene != null)
 	var player_scene = load("res://scenes/player.tscn")
