@@ -2,6 +2,9 @@ extends SceneTree
 ## Runtime boot probe used by CI: instantiate the actual main scene, tick one frame, exit.
 
 func _initialize() -> void:
+	call_deferred("_boot")
+
+func _boot() -> void:
 	print("BOOT PROBE: loading main scene")
 	var scene = load("res://scenes/main.tscn")
 	print("BOOT PROBE: scene loaded=", scene != null)
