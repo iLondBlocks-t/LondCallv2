@@ -1,25 +1,20 @@
 extends Node2D
-## Authored 24-cell slice: collision, room graph, gates, enemies, ambient painting.
+## One authored 7,680px level: hand-placed route, ability gates, enemies, boss arena, and animated art.
 
 signal room_changed(room_number: int, biome: String, room_name: String)
 signal toast_requested(message: String, color: Color)
 signal boss_state_changed(health: int, phase: int)
 
-const ROOM_WIDTH := 1280.0
-const ROOM_COUNT := 24
-const WORLD_WIDTH := ROOM_WIDTH * ROOM_COUNT
+const ROOM_WIDTH := 7680.0
+const ROOM_COUNT := 1
+const WORLD_WIDTH := ROOM_WIDTH
 const GROUND_Y := 550.0
 
 var player: CharacterBody2D
 var gates: Array[Dictionary] = []
 var current_room := -1
 var current_biome := ""
-var room_names := [
-	"Gloamroot Landing", "Lantern Hub", "Rootwell Lift", "Mosswalk", "Husk Cellar", "Forgotten Niche",
-	"Dash Chasm", "Moss Gate", "Tide Steps", "Glassworks", "Wraith Shaft", "Blackwater",
-	"Mote Vault", "Needle Mural", "Flooded Shortcut", "Choir Antechamber", "Index of Ash", "Scriptorium",
-	"Umbral Lock", "Echo Alcove", "Hanging Stacks", "Parity Hall", "Pale Door", "Choir Arena"
-]
+var room_names := ["Moonroot Cathedral"]
 var ability_labels := {
 	&"echo_needle": ["Echo Needle", Color(0.72, 0.38, 1.0)],
 	&"fang_dash": ["Fang Dash", Color(0.32, 0.93, 0.93)],
@@ -43,29 +38,79 @@ func _ready() -> void:
 	_spawn_pickups()
 	_spawn_secrets()
 	_spawn_enemies()
+	_build_audio()
 	_state().ability_unlocked.connect(_on_ability_unlocked)
 	queue_redraw()
 
 func _build_atmosphere() -> void:
 	var wash := CanvasModulate.new()
-	wash.name = "DeepBlueCanvasModulate"
-	wash.color = Color(0.56, 0.64, 0.88, 1.0)
+	wash.name = "MoonrootColorGrade"
+	wash.color = Color(0.78, 0.86, 1.0, 1.0)
 	add_child(wash)
-	var rim_light := PointLight2D.new()
-	rim_light.name = "PlayerRimLight"
-	rim_light.energy = 0.0 # The silhouette renderer owns the crisp rim; this is the runtime light hook.
-	add_child(rim_light)
+	# Generated painted plates are the authored background art. Five plates create one long,
+	# coherent level while keeping the playable geometry readable in front of them.
+	var gloam_texture := load("res://assets/generated/level_gloamroot.png") as Texture2D
+	var archive_texture := load("res://assets/generated/level_archive.png") as Texture2D
+	for index in 5:
+		var backdrop := Sprite2D.new()
+		backdrop.name = "PaintedBackdrop_%02d" % index
+		backdrop.texture = gloam_texture if index < 3 else archive_texture
+		backdrop.position = Vector2(792.0 + index * 1584.0, 336.0)
+		backdrop.z_index = -30
+		backdrop.modulate = Color(0.82, 0.90, 1.0, 0.92)
+		add_child(backdrop)
+	# Soft animated dust gives the hand-painted plates depth on mobile without shaders.
+	var dust := CPUParticles2D.new()
+	dust.name = "AnimatedMoonDust"
+	dust.amount = 70
+	dust.lifetime = 5.5
+	dust.preprocess = 3.0
+	dust.position = Vector2(WORLD_WIDTH * 0.5, 260.0)
+	dust.emission_rect_extents = Vector2(WORLD_WIDTH * 0.5, 210.0)
+	dust.direction = Vector2(0.0, -1.0)
+	dust.spread = 180.0
+	dust.gravity = Vector2(0.0, -4.0)
+	dust.initial_velocity_min = 5.0
+	dust.initial_velocity_max = 18.0
+	dust.scale_amount_min = 1.0
+	dust.scale_amount_max = 2.8
+	dust.color = Color(0.52, 0.93, 0.90, 0.55)
+	dust.z_index = -10
+	add_child(dust)
+
+func _build_audio() -> void:
+	var ambient := AudioStreamPlayer.new()
+	ambient.name = "MoonrootAmbient"
+	ambient.stream = load("res://assets/audio/moonroot_ambient.wav")
+	ambient.volume_db = -18.0
+	if ambient.stream is AudioStreamWAV:
+		ambient.stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	add_child(ambient)
+	ambient.play()
+
+func _play_sfx(path: String, volume_db := -4.0) -> void:
+	var player_audio := AudioStreamPlayer.new()
+	player_audio.stream = load(path)
+	player_audio.volume_db = volume_db
+	add_child(player_audio)
+	player_audio.finished.connect(player_audio.queue_free)
+	player_audio.play()
 
 func _build_collision() -> void:
-	for room in ROOM_COUNT:
-		_add_box("Ground_%02d" % (room + 1), Vector2(room * ROOM_WIDTH + ROOM_WIDTH * 0.5, GROUND_Y + 65.0), Vector2(ROOM_WIDTH, 130.0))
-		# A staggered one-way ledge in each cell creates pogo and wing routes.
-		_add_platform(Vector2(room * ROOM_WIDTH + 360.0, 410.0 + float(room % 3) * 25.0), Vector2(230.0, 22.0))
-		_add_platform(Vector2(room * ROOM_WIDTH + 820.0, 335.0 + float(room % 2) * 35.0), Vector2(190.0, 22.0))
-	_add_gate(3300.0, &"fang_dash", "FANG CHASM")
-	_add_gate(8700.0, &"wraith_wings", "WRAITH SHAFT")
-	_add_gate(14200.0, &"umbral_pulse", "UMBRAL LOCK")
-	_add_gate(19200.0, &"wall_cling", "ARCHIVE WALLS")
+	_add_box("CathedralFloor", Vector2(WORLD_WIDTH * 0.5, GROUND_Y + 65.0), Vector2(WORLD_WIDTH, 130.0))
+	# One hand-authored level: landing, flooded library, traversal shaft, then the choir arena.
+	_add_platform(Vector2(620.0, 420.0), Vector2(260.0, 22.0))
+	_add_platform(Vector2(1320.0, 340.0), Vector2(240.0, 22.0))
+	_add_platform(Vector2(2380.0, 430.0), Vector2(310.0, 22.0))
+	_add_platform(Vector2(3080.0, 315.0), Vector2(230.0, 22.0))
+	_add_platform(Vector2(4100.0, 390.0), Vector2(340.0, 22.0))
+	_add_platform(Vector2(4820.0, 260.0), Vector2(220.0, 22.0))
+	_add_platform(Vector2(5700.0, 420.0), Vector2(280.0, 22.0))
+	_add_platform(Vector2(6500.0, 315.0), Vector2(300.0, 22.0))
+	_add_gate(1850.0, &"fang_dash", "FANG CHASM")
+	_add_gate(3400.0, &"wraith_wings", "WRAITH SHAFT")
+	_add_gate(5000.0, &"umbral_pulse", "UMBRAL LOCK")
+	_add_gate(6100.0, &"wall_cling", "CHOIR DOOR")
 
 func _add_box(label: String, center: Vector2, size: Vector2) -> StaticBody2D:
 	var body := StaticBody2D.new()
@@ -97,16 +142,17 @@ func _spawn_player() -> void:
 	add_child(player)
 	player.global_position = _state().last_safe_position
 	player.attack_landed.connect(_on_attack_landed)
+	player.attack_started.connect(_on_player_attack_started)
 	player.hurt_started.connect(_on_player_hurt)
 	player.died.connect(_on_player_died)
 	player.ability_used.connect(_on_player_ability_used)
 
 func _spawn_pickups() -> void:
-	_spawn_pickup(&"echo_needle", Vector2(630.0, 300.0))
-	_spawn_pickup(&"fang_dash", Vector2(2150.0, 475.0))
-	_spawn_pickup(&"wraith_wings", Vector2(10550.0, 300.0))
-	_spawn_pickup(&"umbral_pulse", Vector2(15100.0, 475.0))
-	_spawn_pickup(&"wall_cling", Vector2(19800.0, 300.0))
+	_spawn_pickup(&"echo_needle", Vector2(720.0, 340.0))
+	_spawn_pickup(&"fang_dash", Vector2(2100.0, 475.0))
+	_spawn_pickup(&"wraith_wings", Vector2(3650.0, 280.0))
+	_spawn_pickup(&"umbral_pulse", Vector2(5250.0, 475.0))
+	_spawn_pickup(&"wall_cling", Vector2(6400.0, 255.0))
 
 func _spawn_pickup(id: StringName, at: Vector2) -> void:
 	if _state().has_ability(id):
@@ -118,7 +164,7 @@ func _spawn_pickup(id: StringName, at: Vector2) -> void:
 	add_child(pickup)
 
 func _spawn_secrets() -> void:
-	var secret_positions := [Vector2(2300.0, 445.0), Vector2(12200.0, 445.0), Vector2(17000.0, 445.0), Vector2(24700.0, 445.0)]
+	var secret_positions := [Vector2(1500.0, 445.0), Vector2(2920.0, 445.0), Vector2(4550.0, 445.0), Vector2(5880.0, 445.0)]
 	for index in secret_positions.size():
 		var glyph := preload("res://scripts/world/secret_glyph.gd").new()
 		glyph.position = secret_positions[index]
@@ -127,10 +173,8 @@ func _spawn_secrets() -> void:
 
 func _spawn_enemies() -> void:
 	var roster := [
-		["rootling", 1160.0], ["sporeback", 2780.0], ["lantern_mite", 3900.0], ["glasswing", 4950.0],
-		["tide_crawler", 6250.0], ["gallery_sentry", 7400.0], ["archive_wisp", 9300.0], ["choir_knight", 11300.0],
-		["sporeback", 12800.0], ["gallery_sentry", 15500.0], ["glasswing", 16800.0], ["tide_crawler", 18100.0],
-		["archive_wisp", 20400.0], ["choir_knight", 22100.0], ["gallery_sentry", 24200.0], ["sporeback", 26600.0],
+		["rootling", 1080.0], ["sporeback", 1650.0], ["lantern_mite", 2480.0], ["glasswing", 2920.0],
+		["tide_crawler", 3920.0], ["gallery_sentry", 4550.0], ["archive_wisp", 5350.0], ["choir_knight", 5850.0],
 	]
 	for item in roster:
 		_spawn_enemy(str(item[0]), float(item[1]), false)
@@ -174,29 +218,33 @@ func _physics_process(delta: float) -> void:
 			player.revive_at(_state().last_safe_position)
 			death_timer = 0.0
 			toast_requested.emit("THE ECHO REMEMBERS.  TRY AGAIN.", Color(0.72, 0.38, 1.0))
-	if boss != null and is_instance_valid(boss) and not boss.defeated_state and room >= ROOM_COUNT:
+	if boss != null and is_instance_valid(boss) and not boss.defeated_state and player.global_position.x > WORLD_WIDTH - 1100.0:
 		boss_state_changed.emit(boss.health, boss.phase)
 	else:
 		boss_state_changed.emit(0, 0)
 	queue_redraw()
 
-func _biome_for_room(room: int) -> String:
-	if room <= 8:
-		return "GLOAMROOT"
-	if room <= 16:
-		return "SUNKEN GALLERIES"
-	return "MOONLESS ARCHIVE"
+func _biome_for_room(_room: int) -> String:
+	return "MOONROOT CATHEDRAL"
 
 func _on_ability_unlocked(id: StringName) -> void:
+	_play_sfx("res://assets/audio/pickup_chime.wav", -2.0)
 	var metadata: Array = ability_labels.get(id, [str(id), Color.WHITE])
 	toast_requested.emit("%s AWAKENS" % metadata[0].to_upper(), metadata[1])
 	_state().save_game()
 
 func _on_player_ability_used(id: StringName) -> void:
-	if id == &"echo_needle":
+	if id == &"fang_dash":
+		_play_sfx("res://assets/audio/dash_whoosh.wav", -3.0)
+	elif id == &"echo_needle":
+		_play_sfx("res://assets/audio/pickup_chime.wav", -7.0)
 		toast_requested.emit("THE HIDDEN REMEMBERS", Color(0.72, 0.38, 1.0))
 	elif id == &"umbral_pulse":
+		_play_sfx("res://assets/audio/boss_sting.wav", -9.0)
 		toast_requested.emit("UMBRA RELEASED", Color(0.36, 0.16, 0.82))
+
+func _on_player_attack_started(_direction: Vector2, _combo_step: int) -> void:
+	_play_sfx("res://assets/audio/blade_swing.wav", -5.0)
 
 func _on_attack_landed(target: Node2D, pogo: bool) -> void:
 	if target != null and target.has_method("receive_hit"):
@@ -206,6 +254,7 @@ func _on_attack_landed(target: Node2D, pogo: bool) -> void:
 			camera.shake(5.0 if pogo else 3.0, 0.10)
 
 func _on_player_hurt() -> void:
+	_play_sfx("res://assets/audio/hurt_crack.wav", -4.0)
 	var camera := player.get_node_or_null("Camera")
 	if camera != null:
 		camera.shake(7.0, 0.15)
@@ -216,6 +265,7 @@ func _on_player_died() -> void:
 		camera.shake(10.0, 0.3)
 
 func _on_boss_telegraph(_enemy: Node2D, _duration: float) -> void:
+	_play_sfx("res://assets/audio/boss_sting.wav", -4.0)
 	toast_requested.emit("ECHO NEEDLE: PARRY THE VIOLET MARK", Color(0.72, 0.38, 1.0))
 
 func _on_boss_defeated(_enemy: Node2D, _motes: int) -> void:

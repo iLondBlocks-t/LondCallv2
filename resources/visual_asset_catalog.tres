@@ -1,0 +1,20 @@
+[gd_resource type="Resource" load_steps=8 format=3]
+
+; High-resolution art catalog. The mobile scene uses the optimized plates in assets/generated;
+; the cinematic masters remain part of the shipped art library for future camera crops.
+[ext_resource type="Texture2D" path="res://assets/generated/hires/gloamroot_4k.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/generated/hires/archive_4k.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/generated/hires/gloamroot_deep_4k.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/generated/hires/archive_moon_4k.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/generated/hires/hero_2k.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/generated/hires/boss_2k.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/generated/hires/codex_4k.png" id="7"]
+
+[resource]
+level_gloamroot_master = ExtResource("1")
+level_archive_master = ExtResource("2")
+level_gloamroot_deep = ExtResource("3")
+level_archive_moon = ExtResource("4")
+hero_master = ExtResource("5")
+boss_master = ExtResource("6")
+codex_master = ExtResource("7")

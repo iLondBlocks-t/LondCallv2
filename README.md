@@ -1,10 +1,10 @@
 # Echofang
 
-A landscape-first Godot 4.x metroidvania vertical slice: precise CharacterBody2D movement, five traversal/combat abilities, pogo combat, an 8-archetype enemy roster, three-phase Pale Choir boss, 24-room graph, procedural silhouette art, touch/gamepad/keyboard controls, save/load, and Android CI export. The APK preset targets `armeabi-v7a` 32-bit ARM for Android 9-class phones and uses the Compatibility renderer.
+A landscape-first Godot 4.x metroidvania vertical slice: one art-forward Moonroot Cathedral level, precise CharacterBody2D movement, five traversal/combat abilities, animated procedural silhouettes, generated cinematic backgrounds, hero/boss/codex art cards, eight enemy archetypes, a three-phase Pale Choir boss, touch/gamepad/keyboard controls, save/load, audio cues, and Android CI export. The APK preset targets `armeabi-v7a` 32-bit ARM for Android 9-class phones and uses the Compatibility renderer.
 
 ## Run
 
-Open the repository in Godot 4.3+ and run `scenes/main.tscn` (or the project root). Keyboard: A/D move, Space jump, X attack/pogo, C dash, Z Echo Needle, V Umbral Pulse. The touch overlay is always landscape-safe.
+Open the repository in Godot 4.3+ and run the project root; the deferred bootstrap enters the single authored level at `scenes/main.tscn`. Keyboard: A/D move, Space jump, X attack/pogo, C dash, Z Echo Needle, V Umbral Pulse. The touch overlay is always landscape-safe.
 
 ## Verify
 
@@ -13,4 +13,4 @@ godot --headless --path . --script res://tests/run_tests.gd
 godot --headless --path . --export-debug "Android" build/Echofang.apk
 ```
 
-Read `DESIGN.md` for the 24-room map graph, gating examples, combat and art direction. `DECISIONS.md` records implementation choices and `SOURCES.md` records asset provenance.
+Read `DESIGN.md` for the one-level route, gating, combat, art direction, and verification record. `DECISIONS.md` records implementation choices and `SOURCES.md` records asset provenance.

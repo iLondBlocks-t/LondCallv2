@@ -1,52 +1,36 @@
 # ECHOFANG — Vertical Slice Design
 
-Echofang is a landscape-only, silhouette-driven 2D metroidvania about an insect knight navigating a drowned underground kingdom. This repository contains a playable, dependency-free vertical slice built in Godot 4.x. The slice deliberately uses procedural vector painting for its art pass: silhouettes, parallax layers, Light2D-style glows, particles, and typography are all rendered at runtime so the project can be cloned and played without a binary asset pack.
+Echofang is a landscape-only 2D metroidvania about an insect knight crossing the Moonroot Cathedral. This repository contains one playable, art-forward Godot 4.x level: generated painted background plates, illustrated hero/boss/codex cards, procedural character animation, particles, lighting, sound cues, and touch/gamepad/keyboard controls.
 
 ## Player promise
 
 Every input has a visible and physical answer within one frame: buffered jump, generous coyote time, sharp acceleration, readable anticipation, hit-stop, and screen shake. Exploration is paced as a loop: learn a route in the Gloamroot Hub, earn Fang Dash and Wraith Wings, use both to cut through the Sunken Galleries, then reach the Choir boss in the Moonless Archive.
 
-## Room graph (24 rooms, 3 biomes)
+## One level: Moonroot Cathedral
 
-The world is a left-to-right connected graph. A room is a 1280px camera cell; gates sit at cell boundaries. `World.gd` renders the full graph as a continuous authored slice while the HUD tracks the current room and biome.
+The scope is intentionally one polished level rather than a broad empty graph. It is a 7,680px left-to-right route with four authored beats: the lantern landing, flooded library, traversal shaft, and Pale Choir arena. The camera follows one continuous playable space; gates are real collision gates and ability rewards are placed directly on the route.
 
 ```text
-                         [H] Needle Shrine (secret, Echo Needle)
-                                  |
-[01] Gloamroot Landing -- [02] Lantern Hub -- [03] Rootwell Lift -- [04] Mosswalk
-         |                       |             |                     |
-[05] Husk Cellar         [06] Forgotten Niche* |              [07] Dash Chasm (Fang Dash)
-         |                       |             |                     |
-         +-----------------------+-------------+-------------- [08] Moss Gate
-                                                               |
-BIOME 2: SUNKEN GALLERIES                                       |
-[09] Tide Steps -- [10] Glassworks -- [11] Wraith Shaft (Wraith Wings) -- [12] Blackwater
-      |                |                    |                         |
-[13] Mote Vault*  [14] Needle Mural*        +------------------- [15] Flooded Shortcut
-                                                               |
-                                                               [16] Choir Antechamber
-                                                               |
-BIOME 3: MOONLESS ARCHIVE                                         |
-[17] Index of Ash -- [18] Scriptorium -- [19] Umbral Lock (Umbral Pulse)
-       |                    |                         |
-[20] Echo Alcove*            +-------------------------+
+[START] Lantern Landing -- Echo Needle shrine -- Fang Chasm gate -- Flooded Library
+                                      |                 |
+                              Secret glyphs       Wraith Wings lift
                                                         |
-[21] Hanging Stacks -- [22] Parity Hall -- [23] Pale Door
-                                                        |
-                                                        [24] Choir Arena (boss)
+                         Umbral Lock -- archive bridge -- Wall Cling / CHOIR DOOR
+                                                                    |
+                                                        [PALE CHOIR ARENA]
 ```
 
-`*` Optional secret rooms require Echo Needle: strike the faintly humming wall glyph and the wall opens. Ability gates are real collision gates in the playable corridor: the amber chasm requires Fang Dash, the vertical shaft requires Wraith Wings, the Umbral Lock requires Umbral Pulse, and the four archive doors require the corresponding traversal state. The hub has two explicit shortcuts back: the Fang Dash return ledge at room 07 and the Wraith Wings lift at room 15.
+Echo Needle reveals four secret glyphs. Fang Dash crosses the first chasm, Wraith Wings reaches the high library lift, Umbral Pulse opens the lock, and Wall Cling opens the final choir door. The point is a complete beginning-to-boss journey that can be finished in one sitting, with no filler rooms.
 
 ## Ability kit and gates
 
 | Ability | Input | Feel / cost | VFX and sound identity | Slice gate |
 | --- | --- | --- | --- | --- |
-| Fang Dash | Dash / C | 0.15s burst, 8-way aim after upgrade, i-frames; 0.65s cooldown | Three cyan afterimages, sharp air-cut chirp | Dash Chasm, room 07; also enables dash-cancel attack |
-| Wraith Wings | Jump in air / Space | One extra jump, small drift, 0.12s hang frame | Pale wing gust, glassy double chime | Wraith Shaft, room 11 |
-| Wall Cling / Wall Jump | Move into wall, Jump | 160px/s slide; fixed 52° outward launch with steering | Amber claw sparks, stone scrape | Scriptorium vertical wall route, room 18 |
-| Echo Needle | Ability 1 / Z | 0.34s charge, reveals secrets and parries telegraphs | Violet sonar rings, low heartbeat ping | Needle Shrine + all `*` secret rooms |
-| Umbral Pulse | Ability 2 / V | 3 Umbra, 0.6s recharge per melee hit; charged piercing beam after Archive upgrade | Black-violet bolt with gold core, bass thump | Umbral Lock, room 19; ranged answer to Gallery sentries |
+| Fang Dash | Dash / C | 0.15s burst, 8-way aim after upgrade, i-frames; 0.65s cooldown | Three cyan afterimages, air-cut whoosh | First chasm in the single route; also enables dash-cancel attack |
+| Wraith Wings | Jump in air / Space | One extra jump, small drift, 0.12s hang frame | Pale wing gust, glassy double chime | Flooded library high lift |
+| Wall Cling / Wall Jump | Move into wall, Jump | 160px/s slide; fixed 52° outward launch with steering | Amber claw sparks, stone scrape | Final choir-door shaft |
+| Echo Needle | Ability 1 / Z | 0.34s charge, reveals secrets and parries telegraphs | Violet sonar rings, low heartbeat ping | Lantern shrine + four secret glyphs |
+| Umbral Pulse | Ability 2 / V | 3 Umbra, 0.6s recharge per melee hit; charged piercing beam | Black-violet bolt with gold core, boss-sting bass | Umbral Lock; ranged answer to sentries |
 
 ## Combat
 
@@ -58,7 +42,7 @@ The slice contains eight readable archetypes: Rootling (patrol), Sporeback (cont
 
 The camera follows with velocity look-ahead and a bounded drag zone. Room edges are represented by world bounds. Landing, attack, damage, dash, and boss impacts call the screen-shake service; hit-stop pauses gameplay for 2–4 physics frames. A CanvasModulate-like navy world wash, warm player rim glow, cyan dash trail, animated dust/spores, and three drifting parallax background bands establish depth without an external texture dependency.
 
-The player presentation is a procedural skeletal-style silhouette: body, mask, cloak, antennae, wing pose, and limbs are separate draw primitives and interpolate their poses from action state. The pose library in `assets/animations/player_animation_library.tres` names the full gameplay set (idle, run, transitions, jump, land, cling, dash, three attacks, hurt, death, and ability poses); the procedural renderer supplies the clean silhouette at runtime. This keeps the source art editable while meeting the gameplay-scale readability target.
+The player presentation combines the procedural skeletal-style silhouette with the generated Echofang hero portrait. Body, mask, cloak, antennae, wing pose, and limbs are separate draw primitives and interpolate their poses from action state. The pose library in `assets/animations/player_animation_library.tres` names the full gameplay set (idle, run, transitions, jump, land, cling, dash, three attacks, hurt, death, and ability poses); the renderer supplies readable gameplay animation while the HUD carries illustrated hero, boss, and enemy-codex cards. Painted background plates are animated with camera movement, dust, pulses, and audio rather than being a static screenshot.
 
 ## Mobile controls
 
@@ -80,4 +64,4 @@ The suite checks feel constants, state transitions for all five abilities, damag
 - Headless verification: the deterministic suite and configured bootstrap/main-scene launch both pass in GitHub Actions run `36076930830` at commit `d43bf87`.
 - Android artifact: the same run uploads `echofang-android-debug`; its export step verifies the APK signature and requires a `lib/armeabi-v7a/` payload.
 - Android: export preset is landscape and explicitly targets `armeabi-v7a` (32-bit ARM) for Android 9 devices; the Compatibility renderer is used because Godot documents Android 6+ for Compatibility and Android 9+ for the heavier Mobile/Forward+ renderer. The CI runner generates an ephemeral debug keystore and signs/verifies the APK with Android SDK `apksigner`, and uploads it as `echofang-android-debug`.
-- Full release work beyond this slice: replace procedural art/audio with commissioned production assets, expand the world graph, tune boss balance with playtest telemetry, add controller remapping UI, and configure a protected release keystore through GitHub Secrets.
+- Full release work beyond this slice: playtest the art-forward one-level route, tune boss balance with telemetry, add controller remapping UI, review generated-art distribution terms, and configure a protected release keystore through GitHub Secrets.

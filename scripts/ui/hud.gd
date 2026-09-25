@@ -10,6 +10,10 @@ var toast_label: Label
 var boss_panel: ColorRect
 var boss_bar: ColorRect
 var title_label: Label
+var hero_art: TextureRect
+var boss_art: TextureRect
+var codex_art: TextureRect
+var art_time := 0.0
 var title_timer := 5.5
 
 func _state():
@@ -23,16 +27,23 @@ func _ready() -> void:
 		world.room_changed.connect(_on_room_changed)
 		world.toast_requested.connect(show_toast)
 		world.boss_state_changed.connect(_on_boss_state)
-	_on_room_changed(2, "GLOAMROOT", "Lantern Hub")
+	_on_room_changed(1, "MOONROOT CATHEDRAL", "Moonroot Cathedral")
 	_state().health_changed.connect(_on_health_changed)
 	_state().motes_changed.connect(_on_motes_changed)
 	_state().ability_unlocked.connect(_on_ability_unlocked)
 	_refresh()
 
 func _process(delta: float) -> void:
+	art_time += delta
 	if title_timer > 0.0:
 		title_timer -= delta
 		title_label.modulate.a = clampf(title_timer * 1.2, 0.0, 1.0)
+	if hero_art != null:
+		hero_art.position.y = 154.0 + sin(art_time * 1.4) * 7.0
+		hero_art.modulate.a = 0.12 + clampf(title_timer * 0.08, 0.0, 0.34)
+	if boss_art != null and boss_art.visible:
+		boss_art.position.y = 104.0 + sin(art_time * 2.0) * 4.0
+		boss_art.modulate.a = 0.36 + sin(art_time * 3.0) * 0.05
 	if toast_label.modulate.a > 0.0:
 		toast_label.modulate.a = maxf(0.0, toast_label.modulate.a - delta * 0.24)
 
@@ -49,12 +60,29 @@ func _make_label(parent: Node, text: String, position: Vector2, size: int, color
 	parent.add_child(label)
 	return label
 
+func _make_art(parent: Control, path: String, at: Vector2, size: Vector2, opacity: float) -> TextureRect:
+	var art := TextureRect.new()
+	art.texture = load(path)
+	art.position = at
+	art.size = size
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	art.modulate = Color(1.0, 1.0, 1.0, opacity)
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(art)
+	return art
+
 func _build_ui() -> void:
 	var root := Control.new()
 	root.name = "SafeArea"
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 44)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	# Illustrated title and boss cards turn the HUD into a proper game front door.
+	hero_art = _make_art(root, "res://assets/generated/hero_portrait.png", Vector2(930, 154), Vector2(280, 430), 0.22)
+	boss_art = _make_art(root, "res://assets/generated/choir_boss_portrait.png", Vector2(1010, 104), Vector2(220, 360), 0.0)
+	boss_art.visible = false
+	codex_art = _make_art(root, "res://assets/generated/enemy_codex.png", Vector2(915, 558), Vector2(320, 150), 0.10)
 	var top_strip := ColorRect.new()
 	top_strip.position = Vector2(0, 0)
 	top_strip.size = Vector2(1280, 76)
@@ -63,12 +91,12 @@ func _build_ui() -> void:
 	root.add_child(top_strip)
 	health_label = _make_label(root, "MASKS  ◇◇◇◇◇", Vector2(24, 16), 21, Color(0.98, 0.78, 0.42))
 	motes_label = _make_label(root, "MOTES  000", Vector2(24, 44), 14, Color(0.67, 0.78, 0.96))
-	room_label = _make_label(root, "02  LANTERN HUB", Vector2(400, 16), 18, Color(0.88, 0.93, 1.0))
-	biome_label = _make_label(root, "GLOAMROOT", Vector2(400, 44), 13, Color(0.45, 0.86, 0.80))
+	room_label = _make_label(root, "01  MOONROOT CATHEDRAL", Vector2(400, 16), 18, Color(0.88, 0.93, 1.0))
+	biome_label = _make_label(root, "MOONROOT CATHEDRAL", Vector2(400, 44), 13, Color(0.45, 0.86, 0.80))
 	ability_label = _make_label(root, "ECHO NEEDLE  [Z]     FANG DASH [C]     WINGS [SPACE]     PULSE [V]", Vector2(690, 22), 12, Color(0.72, 0.80, 0.96))
 	ability_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	ability_label.size = Vector2(540, 38)
-	objective_label = _make_label(root, "FOLLOW THE HUMMING GLYPH", Vector2(24, 636), 14, Color(0.80, 0.86, 0.98))
+	objective_label = _make_label(root, "CROSS THE MOONROOT CATHEDRAL", Vector2(24, 636), 14, Color(0.80, 0.86, 0.98))
 	toast_label = _make_label(root, "", Vector2(310, 592), 18, Color(0.95, 0.77, 0.36))
 	toast_label.size = Vector2(650, 42)
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -119,7 +147,7 @@ func _on_room_changed(number: int, biome: String, room_name: String) -> void:
 		return
 	room_label.text = "%02d  %s" % [number, room_name.to_upper()]
 	biome_label.text = biome
-	objective_label.text = "REACH THE CHOIR ARENA" if number >= 17 else "FOLLOW THE HUMMING GLYPH"
+	objective_label.text = "DEFEAT THE PALE CHOIR" if number >= 1 else "CROSS THE MOONROOT CATHEDRAL"
 
 func _on_ability_unlocked(_id: StringName) -> void:
 	if ability_label == null:
@@ -143,4 +171,6 @@ func _on_boss_state(current: int, phase: int) -> void:
 	if boss_panel == null:
 		return
 	boss_panel.visible = phase > 0 and current > 0
+	if boss_art != null:
+		boss_art.visible = boss_panel.visible
 	boss_bar.size.x = 494.0 * clampf(float(current) / 24.0, 0.0, 1.0)

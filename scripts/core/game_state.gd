@@ -22,7 +22,7 @@ var health: int = MAX_HEALTH
 var motes: int = 0
 var umbra: int = 0
 var last_safe_position := Vector2(180.0, 482.0)
-var current_room: int = 2
+var current_room: int = 1
 var recovery_motes: int = 0
 var recovery_position := Vector2.ZERO
 var expedition_started := false
@@ -44,7 +44,7 @@ func reset_run() -> void:
 	motes = 0
 	umbra = 0
 	last_safe_position = Vector2(180.0, 482.0)
-	current_room = 2
+	current_room = 1
 	recovery_motes = 0
 	recovery_position = Vector2.ZERO
 	expedition_started = true
@@ -144,7 +144,7 @@ func load_game() -> bool:
 	health = clampi(int(saved.get("health", MAX_HEALTH)), 1, MAX_HEALTH)
 	motes = maxi(0, int(saved.get("motes", 0)))
 	umbra = clampi(int(saved.get("umbra", 0)), 0, MAX_UMBRA)
-	current_room = clampi(int(saved.get("current_room", 2)), 1, 24)
+	current_room = clampi(int(saved.get("current_room", 1)), 1, 1)
 	var saved_pos = saved.get("last_safe_position", {})
 	if saved_pos is Dictionary:
 		last_safe_position = Vector2(float(saved_pos.get("x", 180.0)), float(saved_pos.get("y", 482.0)))

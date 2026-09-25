@@ -12,7 +12,7 @@ func _ready() -> void:
 	position_smoothing_speed = follow_speed
 	limit_left = 0
 	limit_top = 0
-	limit_right = 30720
+	limit_right = 7680
 	limit_bottom = 720
 	target = get_parent() as Node2D
 
