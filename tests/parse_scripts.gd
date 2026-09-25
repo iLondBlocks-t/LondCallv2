@@ -26,6 +26,17 @@ func _initialize() -> void:
 	if not valid:
 		quit(1)
 		return
+	var player_scene = load("res://scenes/player.tscn") as PackedScene
+	print("PLAYER SCENE LOAD: ", player_scene)
+	if player_scene == null:
+		quit(1)
+		return
+	var player_instance = player_scene.instantiate()
+	print("PLAYER SCENE INSTANCE: ", player_instance)
+	if player_instance == null:
+		quit(1)
+		return
+	player_instance.free()
 	var main_scene = load("res://scenes/main.tscn") as PackedScene
 	print("MAIN SCENE LOAD: ", main_scene)
 	if main_scene == null:
