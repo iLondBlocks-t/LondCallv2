@@ -72,11 +72,12 @@ Landscape touch controls are constructed in `TouchControls.gd`: left thumb D-pad
 godot --headless --path . --script res://tests/run_tests.gd
 ```
 
-The suite checks feel constants, state transitions for all five abilities, damage and i-frames, JSON save/load, and a render-free scene/resource smoke path. CI runs these checks before export. The workflow then exports, signs, verifies, and ABI-checks the Android APK; physical Android launch verification remains a device/emulator acceptance step rather than something the hosted runner can claim.
+The suite checks feel constants, state transitions for all five abilities, damage and i-frames, JSON save/load, and a main-scene entry smoke path. CI runs these checks before export; the project bootstrap then launches the configured main scene headlessly for three frames. The workflow then exports, signs, verifies, and ABI-checks the Android APK. Physical Android install/launch verification remains a device/emulator acceptance step rather than something the hosted runner can claim.
 
 ## Verification record
 
 - Local structural verification: project, scenes, scripts, resources, docs, and CI are present and tracked.
-- Headless verification: run `godot --headless --path . --script res://tests/run_tests.gd`; the GitHub workflow is the authoritative Godot 4.x / Android export environment.
+- Headless verification: the deterministic suite and configured bootstrap/main-scene launch both pass in GitHub Actions run `36076930830` at commit `d43bf87`.
+- Android artifact: the same run uploads `echofang-android-debug`; its export step verifies the APK signature and requires a `lib/armeabi-v7a/` payload.
 - Android: export preset is landscape and explicitly targets `armeabi-v7a` (32-bit ARM) for Android 9 devices; the Compatibility renderer is used because Godot documents Android 6+ for Compatibility and Android 9+ for the heavier Mobile/Forward+ renderer. The CI runner generates an ephemeral debug keystore and signs/verifies the APK with Android SDK `apksigner`, and uploads it as `echofang-android-debug`.
 - Full release work beyond this slice: replace procedural art/audio with commissioned production assets, expand the world graph, tune boss balance with playtest telemetry, add controller remapping UI, and configure a protected release keystore through GitHub Secrets.
