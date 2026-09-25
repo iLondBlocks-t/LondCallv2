@@ -3,6 +3,7 @@ extends SceneTree
 func _initialize() -> void:
 	var paths := [
 		"res://scripts/core/game_state.gd",
+		"res://scripts/core/bootstrap.gd",
 		"res://scripts/abilities/ability_resource.gd",
 		"res://scripts/player/player.gd",
 		"res://scripts/world/world.gd",
@@ -24,6 +25,11 @@ func _initialize() -> void:
 		if loaded == null:
 			valid = false
 	if not valid:
+		quit(1)
+		return
+	var bootstrap_scene = load("res://scenes/bootstrap.tscn") as PackedScene
+	print("BOOTSTRAP SCENE LOAD: ", bootstrap_scene)
+	if bootstrap_scene == null or bootstrap_scene.instantiate() == null:
 		quit(1)
 		return
 	var player_scene = load("res://scenes/player.tscn") as PackedScene
