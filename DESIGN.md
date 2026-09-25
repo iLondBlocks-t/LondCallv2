@@ -61,7 +61,7 @@ The suite checks feel constants, state transitions for all five abilities, damag
 ## Verification record
 
 - Local structural verification: project, scenes, scripts, resources, docs, and CI are present and tracked.
-- Headless verification: the deterministic suite and configured bootstrap/main-scene launch both pass in GitHub Actions run `36076930830` at commit `d43bf87`.
-- Android artifact: the same run uploads `echofang-android-debug`; its export step verifies the APK signature and requires a `lib/armeabi-v7a/` payload.
+- Headless verification: the deterministic suite and configured bootstrap/main-scene launch both pass in GitHub Actions run `36107217435` at commit `bca4454`.
+- Android artifact: that run uploads `echofang-android-debug` (artifact size 111,112,834 bytes); its export step verifies the APK signature and requires a `lib/armeabi-v7a/` payload, clearing the requested 100 MB content target.
 - Android: export preset is landscape and explicitly targets `armeabi-v7a` (32-bit ARM) for Android 9 devices; the Compatibility renderer is used because Godot documents Android 6+ for Compatibility and Android 9+ for the heavier Mobile/Forward+ renderer. The CI runner generates an ephemeral debug keystore and signs/verifies the APK with Android SDK `apksigner`, and uploads it as `echofang-android-debug`.
 - Full release work beyond this slice: playtest the art-forward one-level route, tune boss balance with telemetry, add controller remapping UI, review generated-art distribution terms, and configure a protected release keystore through GitHub Secrets.

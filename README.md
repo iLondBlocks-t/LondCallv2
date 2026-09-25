@@ -13,4 +13,6 @@ godot --headless --path . --script res://tests/run_tests.gd
 godot --headless --path . --export-debug "Android" build/Echofang.apk
 ```
 
+The current CI artifact is an art-forward ARM32 APK over 100 MB, containing the Moonroot background plates, illustrated character/codex cards, cinematic master art, and procedural ambient/SFX audio. The exported project launches through the deferred bootstrap and enters the single playable level automatically.
+
 Read `DESIGN.md` for the one-level route, gating, combat, art direction, and verification record. `DECISIONS.md` records implementation choices and `SOURCES.md` records asset provenance.
