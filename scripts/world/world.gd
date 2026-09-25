@@ -237,9 +237,9 @@ func _draw() -> void:
 		for arch in 3:
 			var arch_x := x + 120.0 + arch * 420.0 + sin(ambient_time * 0.12 + room) * 18.0
 			draw_arc(Vector2(arch_x, 520), 235.0 + arch * 18.0, PI, TAU, 24, Color(0.12, 0.16, 0.29, 0.32), 28.0)
-		# root/pipe silhouettes
-		draw_line(Vector2(x + 50, 105 + arch * 30), Vector2(x + 320, 240 + arch * 22), Color(0.10, 0.18, 0.25, 0.55), 15.0)
-		draw_line(Vector2(x + 820, 100 + arch * 22), Vector2(x + 1040, 330), Color(0.15, 0.10, 0.25, 0.58), 10.0)
+			# root/pipe silhouettes
+			draw_line(Vector2(x + 50, 105 + arch * 30), Vector2(x + 320, 240 + arch * 22), Color(0.10, 0.18, 0.25, 0.55), 15.0)
+			draw_line(Vector2(x + 820, 100 + arch * 22), Vector2(x + 1040, 330), Color(0.15, 0.10, 0.25, 0.58), 10.0)
 		if room % 2 == 0:
 			draw_circle(Vector2(x + 210, 190 + sin(ambient_time * 0.7 + room) * 9.0), 3.0, Color(0.45, 0.92, 0.86, 0.62))
 			draw_circle(Vector2(x + 980, 250 + sin(ambient_time * 0.8 + room) * 11.0), 2.0, Color(0.76, 0.38, 1.0, 0.64))
