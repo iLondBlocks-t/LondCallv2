@@ -111,7 +111,9 @@ func _process_ground_movement(delta: float) -> void:
 		facing = signf(axis)
 		last_input = Vector2(axis, 0.0)
 	var target := axis * run_speed
-	var response := acceleration_time if absf(axis) > 0.05 else deceleration_time
+	var response := deceleration_time
+	if absf(axis) > 0.05:
+		response = acceleration_time
 	var rate := run_speed / maxf(0.001, response)
 	velocity.x = move_toward(velocity.x, target, rate * delta)
 	if absf(velocity.x) > 8.0:
@@ -148,11 +150,12 @@ func has_used_air_jump() -> bool:
 func _do_jump(is_wing_jump: bool) -> void:
 	jump_buffer_left = 0.0
 	coyote_left = 0.0
-	velocity.y = jump_velocity * (0.92 if is_wing_jump else 1.0)
+	velocity.y = jump_velocity
 	if is_wing_jump:
+		velocity.y *= 0.92
 		air_jump_available = false
 		current_action = &"wing_jump"
-	else:
+	if not is_wing_jump:
 		current_action = &"jump_rise"
 	_fx_burst(Color(0.72, 0.86, 1.0), 5)
 
@@ -260,7 +263,10 @@ func take_damage(amount: int, from: Vector2 = Vector2.ZERO) -> void:
 	invulnerable_left = damage_invulnerability
 	is_hurt = true
 	current_action = &"hurt"
-	velocity = Vector2(260.0 * (-signf(from.x) if from.x != 0.0 else -facing), -240.0)
+	var knockback_direction := -facing
+	if from.x != 0.0:
+		knockback_direction = -signf(from.x)
+	velocity = Vector2(260.0 * knockback_direction, -240.0)
 	hurt_started.emit()
 	hit_stop_left = 0.05
 	_fx_burst(Color(1.0, 0.28, 0.40), 9)
@@ -283,7 +289,10 @@ func revive_at(position: Vector2) -> void:
 
 func _process_landing() -> void:
 	if is_on_floor() and not was_on_floor:
-		current_action = &"land_hard" if absf(velocity.y) > 450.0 else &"land_soft"
+		if absf(velocity.y) > 450.0:
+			current_action = &"land_hard"
+		if absf(velocity.y) <= 450.0:
+			current_action = &"land_soft"
 		_fx_burst(Color(0.66, 0.72, 0.90), 7)
 		footsteps.emit()
 	was_on_floor = is_on_floor()
@@ -334,8 +343,16 @@ func _draw() -> void:
 		var tint: Color = image.get("color", Color(0.32, 0.93, 0.93, 0.0))
 		tint.a = clampf(life * 2.6, 0.0, 0.42)
 		draw_circle(local_position, 11.0 * clampf(life * 5.0, 0.15, 1.0), tint)
-	var bob := sin(fx_time * (7.0 if current_action == &"run" else 3.0)) * (2.0 if current_action != &"jump_rise" else 0.0)
-	var scale_y := 0.88 if current_action.begins_with("land") else 1.0
+	var bob_rate := 3.0
+	if current_action == &"run":
+		bob_rate = 7.0
+	var bob_height := 0.0
+	if current_action != &"jump_rise":
+		bob_height = 2.0
+	var bob := sin(fx_time * bob_rate) * bob_height
+	var scale_y := 1.0
+	if current_action.begins_with("land"):
+		scale_y = 0.88
 	var facing_sign := facing
 	# Cloak and body form a readable insect-knight silhouette.
 	draw_ellipse(Vector2(0, 10 + bob), Vector2(20, 23 * scale_y), Color(0.055, 0.075, 0.15, 1))
@@ -350,7 +367,12 @@ func _draw() -> void:
 	if current_action.begins_with("attack"):
 		var slash_color := Color(1.0, 0.82, 0.38, 0.9)
 		var slash_start := Vector2(10 * facing_sign, -2)
-		draw_arc(slash_start, 38.0, -1.1 if facing_sign > 0 else 2.25, 1.1 if facing_sign > 0 else 4.45, 16, slash_color, 5.0)
+		var slash_start_angle := 2.25
+		var slash_end_angle := 4.45
+		if facing_sign > 0:
+			slash_start_angle = -1.1
+			slash_end_angle = 1.1
+		draw_arc(slash_start, 38.0, slash_start_angle, slash_end_angle, 16, slash_color, 5.0)
 	if current_action == &"echo_needle":
 		for radius in [25.0, 37.0, 49.0]:
 			draw_arc(Vector2(0, -10), radius + sin(fx_time * 8.0) * 3.0, 0.0, TAU, 32, Color(0.72, 0.38, 1.0, 0.5), 2.0)
