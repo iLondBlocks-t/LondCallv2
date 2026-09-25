@@ -1,4 +1,3 @@
-class_name EchofangPlayer
 extends CharacterBody2D
 ## Tunable, deterministic CharacterBody2D controller.
 ## All timing is measured in seconds inside _physics_process (60 Hz in project settings).

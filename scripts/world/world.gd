@@ -1,4 +1,3 @@
-class_name EchofangWorld
 extends Node2D
 ## Authored 24-cell slice: collision, room graph, gates, enemies, ambient painting.
 

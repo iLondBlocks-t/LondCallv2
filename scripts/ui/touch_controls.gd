@@ -1,4 +1,3 @@
-class_name EchofangTouchControls
 extends CanvasLayer
 ## Landscape-safe touch overlay; the same InputMap actions feed keyboard, gamepad, and touch.
 

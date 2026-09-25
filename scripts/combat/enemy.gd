@@ -1,4 +1,3 @@
-class_name EchofangEnemy
 extends Node2D
 ## One compact enemy contract powers eight archetypes and the three-phase Choir boss.
 

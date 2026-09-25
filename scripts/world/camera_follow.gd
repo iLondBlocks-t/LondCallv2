@@ -1,4 +1,3 @@
-class_name EchofangCamera
 extends Camera2D
 
 @export var follow_speed := 7.0

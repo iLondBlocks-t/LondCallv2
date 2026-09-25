@@ -1,4 +1,3 @@
-class_name AbilityPickup
 extends Area2D
 
 var ability_id: StringName

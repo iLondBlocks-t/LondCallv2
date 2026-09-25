@@ -1,4 +1,3 @@
-class_name UmbralBolt
 extends Node2D
 
 var direction := Vector2.RIGHT

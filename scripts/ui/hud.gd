@@ -1,4 +1,3 @@
-class_name EchofangHUD
 extends CanvasLayer
 
 var health_label: Label

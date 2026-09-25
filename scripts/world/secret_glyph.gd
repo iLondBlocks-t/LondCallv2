@@ -1,4 +1,3 @@
-class_name SecretGlyph
 extends Node2D
 
 var revealed := false
