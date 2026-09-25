@@ -126,6 +126,10 @@ jobs:
             --out build/Echofang.apk build/Echofang-unsigned.apk
           "$APKSIGNER" verify --verbose build/Echofang.apk
           test -s build/Echofang.apk
+          APK_BYTES=$(stat -c%s build/Echofang.apk)
+          echo "Final APK bytes: $APK_BYTES"
+          # The art-forward acceptance build must remain over 100 MB, not regress to the prototype.
+          test "$APK_BYTES" -ge 100000000
           # The target handset is a 32-bit ARM Android 9 device; fail if the ABI is absent.
           unzip -l build/Echofang.apk | grep -q "lib/armeabi-v7a/"
 
