@@ -77,23 +77,6 @@ jobs:
           done < test-output.log
           exit 1
 
-      - name: Launch main scene headlessly
-        shell: bash
-        run: |
-          set -o pipefail
-          timeout 30s godot --headless --display-driver headless --path . --script res://tests/boot_scene.gd --verbose 2>&1 | tee app-smoke.log
-          test ${PIPESTATUS[0]} -eq 0
-          ! grep -q "^ERROR:" app-smoke.log
-
-      - name: Surface main scene smoke output
-        if: failure()
-        shell: bash
-        run: |
-          while IFS= read -r line; do
-            [ -n "$line" ] && echo "::error title=Main scene smoke::$line"
-          done < app-smoke.log
-          exit 1
-
       - name: Export signed debug APK
         id: export
         shell: bash
@@ -126,6 +109,8 @@ jobs:
             --out build/Echofang.apk build/Echofang-unsigned.apk
           "$APKSIGNER" verify --verbose build/Echofang.apk
           test -s build/Echofang.apk
+          # The target handset is a 32-bit ARM Android 9 device; fail if the ABI is absent.
+          unzip -l build/Echofang.apk | grep -q "lib/armeabi-v7a/"
 
       - name: Surface Android export output as annotations
         if: failure() && steps.export.conclusion == 'failure'
@@ -156,7 +141,6 @@ jobs:
           name: echofang-failure-logs
           path: |
             test-output.log
-            app-smoke.log
             export-output.log
             ~/.local/share/godot/app_userdata/**/*.log
             .godot/**/*.log

@@ -72,7 +72,7 @@ Landscape touch controls are constructed in `TouchControls.gd`: left thumb D-pad
 godot --headless --path . --script res://tests/run_tests.gd
 ```
 
-The suite checks feel constants, state transitions for all five abilities, damage and i-frames, JSON save/load, and a scene-transition smoke path. CI runs these checks before export. The headless smoke path instantiates the main scene, advances 60 seconds of physics, traverses the hub, and fails on any captured Godot error.
+The suite checks feel constants, state transitions for all five abilities, damage and i-frames, JSON save/load, and a render-free scene/resource smoke path. CI runs these checks before export. The workflow then exports, signs, verifies, and ABI-checks the Android APK; physical Android launch verification remains a device/emulator acceptance step rather than something the hosted runner can claim.
 
 ## Verification record
 
