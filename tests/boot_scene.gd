@@ -5,14 +5,15 @@ func _initialize() -> void:
 	call_deferred("_boot")
 
 func _boot() -> void:
-	print("BOOT PROBE: loading main scene")
-	for path in ["res://scripts/world/world.gd", "res://scripts/ui/hud.gd", "res://scripts/ui/touch_controls.gd"]:
-		var script = load(path)
-		print("BOOT PROBE: script ", path, " loaded=", script != null)
-	var scene = load("res://scenes/main.tscn")
-	print("BOOT PROBE: scene loaded=", scene != null)
+	print("BOOT PROBE: loading player scene")
 	var player_scene = load("res://scenes/player.tscn")
 	print("BOOT PROBE: player scene loaded=", player_scene != null)
+	print("BOOT PROBE: loading world script")
+	var world_script = load("res://scripts/world/world.gd")
+	print("BOOT PROBE: world script loaded=", world_script != null)
+	print("BOOT PROBE: loading main scene")
+	var scene = load("res://scenes/main.tscn")
+	print("BOOT PROBE: scene loaded=", scene != null)
 	if scene == null:
 		quit(1)
 		return
